@@ -3,9 +3,6 @@
  * Watches for ad slots via MutationObserver, reports to service worker,
  * and hides ad elements when the service worker returns "suppress".
  *
- * Also captures iframe src URLs so the service worker can add network-level
- * blocking rules via declarativeNetRequest for subsequent loads.
- *
  * No user identity is ever sent — only campaign ID from ad metadata
  * and a cohort derived from timezone + screen width.
  */
@@ -33,14 +30,6 @@ function extractCampaignId(el) {
   );
 }
 
-function extractAdUrl(el) {
-  // Capture the iframe src for network-level blocking.
-  // Try the element itself first (if it's an iframe), then first child iframe.
-  if (el.tagName === "IFRAME" && el.src) return el.src;
-  const child = el.querySelector("iframe[src]");
-  return child?.src || "";
-}
-
 function deriveCohort() {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
   let geo = "unknown";
@@ -64,12 +53,10 @@ function reportImpression(el) {
       cohortId: deriveCohort(),
       campaignId,
       hostname: location.hostname,
-      adUrl: extractAdUrl(el),
     },
     (response) => {
       if (chrome.runtime.lastError) return; // service worker restarted — no-op
       if (response?.action === "suppress") {
-        // DOM hide for this load (network rule blocks subsequent loads).
         el.style.setProperty("display", "none", "important");
         el.setAttribute("aria-hidden", "true");
         el.setAttribute("data-veil", "suppressed");

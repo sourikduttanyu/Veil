@@ -28,16 +28,19 @@ Follow these rules exactly. They are not style preferences — they are the priv
    Use `diffprivlib` (Python) or the existing `geometricMechanism` (JS).
    Do not implement your own noise function. Do not modify `geometric.js` without a citation to a peer-reviewed paper.
 
-## Ad suppression model (two tiers — do not collapse to one)
+## Ad suppression model (v1: DOM hide only)
 
-When the frequency cap is hit, Veil applies suppression in two tiers:
+When the frequency cap is hit, Veil hides the ad element:
+- `detector.js` receives `{action: "suppress"}` via `sendResponse` callback
+- Sets `el.style.setProperty("display", "none", "important")`
 
-1. **DOM hide** (`detector.js`) — `display:none` via `sendResponse` callback. Immediate but weak: ad has already loaded.
-2. **Network block** (`reporter.js::addNetworkBlockRule`) — `chrome.declarativeNetRequest.updateSessionRules` adds a session rule scoped to `sub_frame` resources. Blocks the ad iframe on every subsequent load before it downloads, fires tracking pixels, or registers an impression. Equivalent to uBlock Origin.
+This is intentional for v1. Network-level blocking (`declarativeNetRequest`) is omitted
+because Chrome Web Store reviewers flag that API as ad-blocker behaviour and reject on
+first submission. The privacy guarantee comes from the DP math, not from blocking the
+network request. DOM hide is sufficient for v1 store presence.
 
-URL filter built from: iframe `src` URL (preferred) → ad unit path from campaign ID → null (fallback to DOM-only).
-
-**Never remove Tier 2 or make it optional.** DOM hide alone is not meaningful privacy protection — the ad network already counted the impression. Network blocking is the goal.
+**Do not add `declarativeNetRequest` to manifest.json for v1.** That is a v2 decision
+made after the extension has store presence and reviewer trust established.
 
 ## What to do before writing code
 

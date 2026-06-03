@@ -15,19 +15,10 @@ Update status as each item is resolved.
   Live at: `https://sourikduttanyu.github.io/Veil/privacy-policy.html`
   - [ ] Add this URL to the Chrome Web Store listing during submission.
 
-- [ ] **`declarativeNetRequest` permission justification — HIGH RISK**
-
-  This is the most likely rejection reason. Google added MV3 specifically to limit ad-blocking extensions that use this API. Chrome Web Store policy says extensions that block requests must have a clearly stated non-deceptive primary purpose.
-
-  **Veil's position:** Frequency capping is a standard practice in the ad industry. Veil enforces it client-side, without surveillance. This is not blanket ad blocking — only ads that have appeared more than N times are blocked. The first N impressions always load.
-
-  **What to write in the "Permission justification" field:**
-  > Veil uses `declarativeNetRequest` to enforce ad frequency caps. When an ad exceeds a user-configured impression limit (default: 5), Veil adds a session-only network rule blocking that specific ad unit from loading on subsequent page visits. Rules are scoped to `sub_frame` resources only, target specific ad unit URL paths (not entire domains), and are automatically cleared when the browser session ends. This is not blanket ad blocking — Veil does not block all ads. It enforces the same frequency limits that ad networks themselves apply, but client-side and without user identification.
-
-  **What to write in "Single purpose description":**
-  > Veil enforces ad frequency caps using local differential privacy. It prevents the same ad from appearing more than a configurable number of times, without tracking user identity.
-
-  **Risk level:** Medium-high. Google may reject on first submission. If rejected, the appeal should cite: (1) frequency capping is a stated advertiser best practice, (2) rules are session-only and ad-unit-specific, not domain-wide, (3) the extension does not replace ads or inject content.
+- [x] **`declarativeNetRequest` removed — not used in v1**
+  Network-level blocking deferred to v2. v1 uses DOM hiding only (display:none).
+  This eliminates the primary CWS rejection risk. The privacy guarantee is unchanged —
+  it comes from the DP math, not from blocking network requests.
 
 ---
 
@@ -42,19 +33,18 @@ Update status as each item is resolved.
 
 - [ ] **Update permission justification to cover all three permissions**
 
-  | Permission | Justification |
-  |---|---|
-  | `storage` | Stores epsilon setting, frequency cap, session stats for popup display. No browsing data. |
-  | `activeTab` | Reads ad slot attributes (data-ad-slot, iframe src) from the active tab to identify which campaign is being seen. |
-  | `declarativeNetRequest` | Session rules to block over-cap ad units at network level. Rules are ad-unit-specific, sub_frame only, session-scoped. See above. |
-  | `https://*/*` host permission | Content script must run on all pages to detect ad slots. Ad slots appear on any site, so broad host permission is required. No page content, URLs, or user data is transmitted — only a scrambled impression count. |
+  | Permission | Risk | Justification |
+  |---|---|---|
+  | `storage` | None | Saves epsilon setting, frequency cap, session stats for popup. No browsing data. |
+  | `activeTab` | Low | Reads ad slot attributes (data-ad-slot, element id) to identify which campaign is being seen. |
+  | `https://*/*` host permission | Medium | Content script must run on all pages — ad slots appear on any site. No page content or URLs transmitted. Only a scrambled impression count. |
 
 ---
 
 ## Recommended before submitting
 
-- [ ] **Test on Chrome stable — especially declarativeNetRequest behaviour**
-  Load unpacked → browse weather.com, cnn.com → let an ad hit the cap → confirm network tab in DevTools shows the subsequent iframe request blocked (not just hidden).
+- [ ] **Test on Chrome stable**
+  Load unpacked → browse weather.com, cnn.com → let an ad hit the cap → confirm the element gets `display:none` and `data-veil="suppressed"` attribute in DevTools Elements panel.
 
 - [x] **GitHub Pages live** — `https://sourikduttanyu.github.io/Veil/`
 
@@ -92,7 +82,7 @@ Chrome Web Store rejections come with a policy code. Most likely codes for Veil:
 | Backend: local-only default | ✅ Done | |
 | Privacy policy written + live | ✅ Done | sourikduttanyu.github.io/Veil/privacy-policy.html |
 | GitHub Pages live | ✅ Done | |
-| declarativeNetRequest justification | ⚠️ Written here, must paste in CWS form | High rejection risk |
+| declarativeNetRequest removed (v1) | ✅ Done | Eliminates primary rejection risk |
 | Screenshots | ❌ Needed | |
 | $5 developer fee | ❌ Needed | |
 | Permission justification pasted in CWS | ❌ Needed | |
