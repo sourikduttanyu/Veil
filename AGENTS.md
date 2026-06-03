@@ -28,6 +28,17 @@ Follow these rules exactly. They are not style preferences — they are the priv
    Use `diffprivlib` (Python) or the existing `geometricMechanism` (JS).
    Do not implement your own noise function. Do not modify `geometric.js` without a citation to a peer-reviewed paper.
 
+## Ad suppression model (two tiers — do not collapse to one)
+
+When the frequency cap is hit, Veil applies suppression in two tiers:
+
+1. **DOM hide** (`detector.js`) — `display:none` via `sendResponse` callback. Immediate but weak: ad has already loaded.
+2. **Network block** (`reporter.js::addNetworkBlockRule`) — `chrome.declarativeNetRequest.updateSessionRules` adds a session rule scoped to `sub_frame` resources. Blocks the ad iframe on every subsequent load before it downloads, fires tracking pixels, or registers an impression. Equivalent to uBlock Origin.
+
+URL filter built from: iframe `src` URL (preferred) → ad unit path from campaign ID → null (fallback to DOM-only).
+
+**Never remove Tier 2 or make it optional.** DOM hide alone is not meaningful privacy protection — the ad network already counted the impression. Network blocking is the goal.
+
 ## What to do before writing code
 
 - Check `server/store/postgres.go` — all three tables have no `user_id` column. Keep it that way.

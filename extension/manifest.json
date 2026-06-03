@@ -5,7 +5,8 @@
   "description": "Stop ads from stalking you. Veil scrambles your ad data before it ever leaves your device.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "https://*/*",
