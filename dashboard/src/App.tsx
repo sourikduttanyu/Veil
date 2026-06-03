@@ -8,12 +8,12 @@ import {
   fetchBudgets,
   fetchEnforcementSummary,
   fetchTopAds,
+  fetchCampaigns,
   type Bucket,
   type BudgetRow,
   type AdStats,
 } from "./api";
 
-const DEFAULT_CAMPAIGN = import.meta.env.VITE_DEFAULT_CAMPAIGN || "camp_001";
 const DEFAULT_COHORT = import.meta.env.VITE_DEFAULT_COHORT || "us-unknown-desktop";
 const POLL_MS = 5000;
 
@@ -81,10 +81,18 @@ export default function App() {
   const [suppressed, setSuppressed] = useState(0);
   const [topAds, setTopAds] = useState<AdStats[]>([]);
   const [lastUpdated, setLastUpdated] = useState<string>("");
-  const [campaign, setCampaign] = useState(DEFAULT_CAMPAIGN);
+  const [campaigns, setCampaigns] = useState<string[]>([]);
+  const [campaign, setCampaign] = useState("");
   const [cohort, setCohort] = useState(DEFAULT_COHORT);
   const [epsilon, setEpsilon] = useState<number>(1.0);
   const [showHow, setShowHow] = useState(false);
+
+  useEffect(() => {
+    fetchCampaigns().then(list => {
+      setCampaigns(list);
+      if (list.length > 0) setCampaign(list[0]);
+    });
+  }, []);
 
   async function poll() {
     try {
@@ -144,15 +152,22 @@ export default function App() {
             </div>
           </div>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-[10px] text-[#9ca3af] uppercase tracking-wider">Campaign</span>
-            <input
-              className="bg-[#141420] border border-[#2a2a3e] text-xs text-[#e0e0f0] px-2.5 py-1.5 rounded-md w-28 focus:outline-none focus:border-[#5050a0]"
+          <div className="flex flex-col gap-1">
+            <span className="flex items-center text-[10px] text-[#9ca3af] uppercase tracking-wider">
+              Ad Slot
+              <InfoTooltip text="Each entry is a specific ad slot — a position on a page where an ad loads (e.g. a banner on CNN or a sponsored slot on weather.com). Real slots come from the extension; 'camp_001/002' are from the simulator." />
+            </span>
+            <select
+              className="bg-[#141420] border border-[#2a2a3e] text-xs text-[#e0e0f0] px-2.5 py-1.5 rounded-md w-44 focus:outline-none focus:border-[#5050a0]"
               value={campaign}
               onChange={e => setCampaign(e.target.value)}
-              placeholder="camp_001"
-            />
-          </label>
+            >
+              {campaigns.length === 0 && <option value="">Loading…</option>}
+              {campaigns.map(c => (
+                <option key={c} value={c}>{c.length > 32 ? "…" + c.slice(-30) : c}</option>
+              ))}
+            </select>
+          </div>
           <label className="flex flex-col gap-1">
             <span className="text-[10px] text-[#9ca3af] uppercase tracking-wider">User Group</span>
             <input

@@ -140,6 +140,27 @@ func (s *PGStore) GetEnforcementTotal(ctx context.Context) (EnforcementSummary, 
 	return summary, rows.Err()
 }
 
+// GetCampaigns returns distinct campaign IDs ordered by total impression volume.
+func (s *PGStore) GetCampaigns(ctx context.Context) ([]string, error) {
+	rows, err := s.db.Query(ctx,
+		`SELECT campaign_id FROM cap_enforcement_log GROUP BY campaign_id ORDER BY COUNT(*) DESC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ids []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, rows.Err()
+}
+
 // GetDistribution aggregates impression_log by noisy_value for a campaign.
 func (s *PGStore) GetDistribution(ctx context.Context, campaignID string) ([]Bucket, error) {
 	rows, err := s.db.Query(ctx,

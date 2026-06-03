@@ -10,6 +10,14 @@ export interface BudgetRow {
 export interface EnforcementSummary { served: number; suppressed: number; }
 export interface AdStats { campaign_id: string; served: number; suppressed: number; total: number; }
 
+export async function fetchCampaigns(): Promise<string[]> {
+  try {
+    const r = await fetch(`${CAP_URL}/campaigns`);
+    if (r.ok) return r.json();
+  } catch {}
+  return [];
+}
+
 export async function fetchDistribution(campaignId: string): Promise<Bucket[]> {
   const r = await fetch(`${CAP_URL}/distribution/${campaignId}`);
   const d = await r.json();
