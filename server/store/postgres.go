@@ -46,6 +46,74 @@ func (s *PGStore) WriteEnforcementAsync(cohortID, campaignID string, cap int, ac
 	}()
 }
 
+type AdStats struct {
+	CampaignID string `json:"campaign_id"`
+	Served     int    `json:"served"`
+	Suppressed int    `json:"suppressed"`
+	Total      int    `json:"total"`
+}
+
+// GetTopAds returns per-campaign served/suppressed counts for a cohort, top 10 by volume.
+func (s *PGStore) GetTopAds(ctx context.Context, cohortID string) ([]AdStats, error) {
+	rows, err := s.db.Query(ctx, `
+		SELECT campaign_id,
+			SUM(CASE WHEN action='serve' THEN 1 ELSE 0 END)::int,
+			SUM(CASE WHEN action='suppress' THEN 1 ELSE 0 END)::int,
+			COUNT(*)::int
+		FROM cap_enforcement_log
+		WHERE cohort_id=$1
+		GROUP BY campaign_id
+		ORDER BY COUNT(*) DESC
+		LIMIT 10
+	`, cohortID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []AdStats
+	for rows.Next() {
+		var a AdStats
+		if err := rows.Scan(&a.CampaignID, &a.Served, &a.Suppressed, &a.Total); err != nil {
+			return nil, err
+		}
+		result = append(result, a)
+	}
+	return result, rows.Err()
+}
+
+type EnforcementSummary struct {
+	Served     int `json:"served"`
+	Suppressed int `json:"suppressed"`
+}
+
+// GetEnforcementSummary returns serve/suppress counts for a campaign.
+func (s *PGStore) GetEnforcementSummary(ctx context.Context, campaignID string) (EnforcementSummary, error) {
+	rows, err := s.db.Query(ctx,
+		`SELECT action, COUNT(*) FROM cap_enforcement_log WHERE campaign_id=$1 GROUP BY action`,
+		campaignID,
+	)
+	if err != nil {
+		return EnforcementSummary{}, err
+	}
+	defer rows.Close()
+
+	var summary EnforcementSummary
+	for rows.Next() {
+		var action string
+		var count int
+		if err := rows.Scan(&action, &count); err != nil {
+			return EnforcementSummary{}, err
+		}
+		if action == "serve" {
+			summary.Served = count
+		} else {
+			summary.Suppressed = count
+		}
+	}
+	return summary, rows.Err()
+}
+
 // GetDistribution aggregates impression_log by noisy_value for a campaign.
 func (s *PGStore) GetDistribution(ctx context.Context, campaignID string) ([]Bucket, error) {
 	rows, err := s.db.Query(ctx,

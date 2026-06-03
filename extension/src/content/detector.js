@@ -1,8 +1,10 @@
 /**
  * Content script — detects ad impressions on the current page.
- * Watches for ad slots via MutationObserver, sends impression events
- * to the service worker. Never sends user identity — only campaign ID
- * derived from ad metadata and a cohort derived from device signals.
+ * Watches for ad slots via MutationObserver, reports to service worker,
+ * and hides ad elements when the service worker returns "suppress".
+ *
+ * No user identity is ever sent — only campaign ID from ad metadata
+ * and a cohort derived from timezone + screen width.
  */
 
 const AD_SELECTORS = [
@@ -20,7 +22,6 @@ const AD_SELECTORS = [
 const seen = new Set();
 
 function extractCampaignId(el) {
-  // Best-effort campaign ID from ad metadata — falls back to slot ID
   return (
     el.getAttribute("data-ad-slot") ||
     el.getAttribute("data-ad-unit-path") ||
@@ -30,8 +31,6 @@ function extractCampaignId(el) {
 }
 
 function deriveCohort() {
-  // Cohort from timezone (geo proxy) + device width (device type).
-  // No user identity. No fingerprinting beyond these two signals.
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
   let geo = "unknown";
   if (/America/.test(tz)) geo = "us";
@@ -48,12 +47,23 @@ function reportImpression(el) {
   if (seen.has(key)) return; // one report per campaign per page load
   seen.add(key);
 
-  chrome.runtime.sendMessage({
-    type: "AD_IMPRESSION",
-    cohortId: deriveCohort(),
-    campaignId,
-    hostname: location.hostname,
-  });
+  chrome.runtime.sendMessage(
+    {
+      type: "AD_IMPRESSION",
+      cohortId: deriveCohort(),
+      campaignId,
+      hostname: location.hostname,
+    },
+    (response) => {
+      if (chrome.runtime.lastError) return; // service worker restarted — no-op
+      if (response?.action === "suppress") {
+        // Hide the ad element. !important prevents ad network CSS overriding it.
+        el.style.setProperty("display", "none", "important");
+        el.setAttribute("aria-hidden", "true");
+        el.setAttribute("data-veil", "suppressed");
+      }
+    }
+  );
 }
 
 function scanExisting() {

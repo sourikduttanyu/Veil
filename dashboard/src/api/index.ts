@@ -8,6 +8,7 @@ export interface BudgetRow {
   window_expires_at: string;
 }
 export interface EnforcementSummary { served: number; suppressed: number; }
+export interface AdStats { campaign_id: string; served: number; suppressed: number; total: number; }
 
 export async function fetchDistribution(campaignId: string): Promise<Bucket[]> {
   const r = await fetch(`${CAP_URL}/distribution/${campaignId}`);
@@ -28,6 +29,11 @@ export async function fetchEnforcementSummary(campaignId: string): Promise<Enfor
     if (r.ok) return r.json();
   } catch {}
   return { served: 0, suppressed: 0 };
+}
+
+export async function fetchTopAds(cohortId: string): Promise<AdStats[]> {
+  const r = await fetch(`${CAP_URL}/top-ads/${cohortId}`);
+  return r.json();
 }
 
 export const CAP_SERVICE_URL = CAP_URL;

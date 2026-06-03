@@ -78,6 +78,8 @@ func main() {
 	r.Post("/impressions", handlers.Impressions(rs, pg, bc, cfg.FrequencyCap, windowTTL, cfg.DPEpsilon))
 	r.Get("/caps/{cohort_id}/{campaign_id}", handlers.GetCaps(rs, bc, cfg.FrequencyCap))
 	r.Get("/distribution/{campaign_id}", handlers.GetDistribution(pg))
+	r.Get("/enforcement-summary/{campaign_id}", handlers.GetEnforcementSummary(pg))
+	r.Get("/top-ads/{cohort_id}", handlers.GetTopAds(pg))
 
 	srv := &http.Server{Addr: ":" + cfg.Port, Handler: r}
 

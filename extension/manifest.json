@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "privacap",
+  "name": "Veil",
   "version": "0.1.0",
-  "description": "Local differential privacy for ad frequency capping. True counts never leave your browser.",
+  "description": "Stop ads from stalking you. Veil scrambles your ad data before it ever leaves your device.",
   "permissions": [
     "storage",
     "activeTab"
   ],
   "host_permissions": [
-    "http://localhost:8080/*",
     "https://*/*",
     "http://*/*"
   ],
@@ -25,8 +24,9 @@
   ],
   "action": {
     "default_popup": "src/popup/popup.html",
-    "default_title": "privacap — ε-DP frequency capping"
+    "default_title": "Veil — your data stays yours"
   },
+  "homepage_url": "https://github.com/sourikduttanyu/privacap",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",

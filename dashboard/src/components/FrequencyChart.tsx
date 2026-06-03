@@ -5,29 +5,34 @@ export function FrequencyChart({ data }: { data: Bucket[] }) {
   if (!data.length) return <Empty label="No impression data yet" />;
   return (
     <ResponsiveContainer width="100%" height={200}>
-      <BarChart data={data} margin={{ top: 4, right: 8, bottom: 0, left: -16 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#222" />
-        <XAxis dataKey="count" tick={{ fill: "#888", fontSize: 11 }} label={{ value: "Noisy count", position: "insideBottom", offset: -2, fill: "#666", fontSize: 11 }} />
-        <YAxis tick={{ fill: "#888", fontSize: 11 }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
+      <BarChart data={data} margin={{ top: 4, right: 8, bottom: 28, left: -16 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#1e1e2a" />
+        <XAxis
+          dataKey="count"
+          tick={{ fill: "#9ca3af", fontSize: 11 }}
+          label={{ value: "Times this ad appeared (scrambled for privacy)", position: "insideBottom", offset: -12, fill: "#9ca3af", fontSize: 10 }}
+        />
+        <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
         <Tooltip
-          contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6 }}
-          labelStyle={{ color: "#aaa" }}
-          formatter={(v: any) => [`${((v as number) * 100).toFixed(1)}%`, "Frequency"]}
+          contentStyle={{ background: "#16161f", border: "1px solid #2e2e42", borderRadius: 8, fontSize: 12 }}
+          labelStyle={{ color: "#c8c8d8" }}
+          formatter={(v: any) => [`${((v as number) * 100).toFixed(1)}%`, "of all exposures"]}
+          labelFormatter={(label) => `Appeared ${label} time${label !== 1 ? "s" : ""}`}
         />
         <Bar dataKey="frequency" radius={[3, 3, 0, 0]}>
-          {data.map((_, i) => <Cell key={i} fill={`hsl(${220 + i * 15}, 70%, 60%)`} />)}
+          {data.map((_, i) => <Cell key={i} fill={`hsl(${220 + i * 15}, 65%, 62%)`} />)}
         </Bar>
       </BarChart>
     </ResponsiveContainer>
   );
 }
 
-function Empty({ label }: { label: string }) {
+function Empty({ label: _label }: { label: string }) {
   return (
     <div className="flex flex-col items-center justify-center h-48 gap-2">
-      <div className="text-[#333] text-sm">{label}</div>
-      <div className="text-[10px] text-[#2a2a2a] text-center max-w-48 leading-relaxed">
-        Bars will appear here as the browser extension detects ads and sends noisy reports to the cap service.
+      <div className="text-[#6b7280] text-sm">No ad exposures tracked yet</div>
+      <div className="text-xs text-[#4b5563] text-center max-w-48 leading-relaxed">
+        Browse with the extension active and privacap will map how often each ad tried to reach you.
       </div>
     </div>
   );
