@@ -2,29 +2,53 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recha
 
 export function EnforcementRate({ served, suppressed }: { served: number; suppressed: number }) {
   const total = served + suppressed;
-  if (total === 0) return <div className="flex items-center justify-center h-48 text-gray-600 text-sm">No enforcement data yet</div>;
+
+  if (total === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center h-48 gap-2">
+        <div className="text-[#333] text-sm">No enforcement data yet</div>
+        <div className="text-[10px] text-[#2a2a2a] text-center max-w-52 leading-relaxed">
+          Once ads are being processed, this shows what percentage were shown (under limit) vs. blocked (over limit).
+        </div>
+      </div>
+    );
+  }
+
+  const serveRate = ((served / total) * 100).toFixed(1);
+  const suppressRate = ((suppressed / total) * 100).toFixed(1);
 
   const data = [
-    { name: "Served", value: served },
-    { name: "Suppressed", value: suppressed },
+    { name: "Served (shown to user)", value: served },
+    { name: "Suppressed (blocked)", value: suppressed },
   ];
   const COLORS = ["#4ade80", "#f87171"];
 
   return (
     <div>
-      <ResponsiveContainer width="100%" height={180}>
+      <ResponsiveContainer width="100%" height={170}>
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={50} outerRadius={75} dataKey="value" paddingAngle={3}>
+          <Pie data={data} cx="50%" cy="50%" innerRadius={48} outerRadius={72} dataKey="value" paddingAngle={3}>
             {data.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
           </Pie>
           <Tooltip
-            contentStyle={{ background: "#1a1a1a", border: "1px solid #333", borderRadius: 6 }}
-            formatter={(v: any) => [`${v} (${(((v as number) / total) * 100).toFixed(1)}%)`, ""]}
+            contentStyle={{ background: "#1c1c1e", border: "1px solid #2e2e2e", borderRadius: 8, fontSize: 12 }}
+            formatter={(v: any) => {
+              const pct = (((v as number) / total) * 100).toFixed(1);
+              return [`${v} impressions (${pct}%)`, ""];
+            }}
           />
-          <Legend iconType="circle" iconSize={8} formatter={(v) => <span className="text-xs text-gray-400">{v}</span>} />
+          <Legend
+            iconType="circle"
+            iconSize={7}
+            formatter={(v) => <span style={{ fontSize: 11, color: "#888" }}>{v}</span>}
+          />
         </PieChart>
       </ResponsiveContainer>
-      <div className="text-center text-xs text-gray-600">{total} total decisions</div>
+      <div className="flex justify-center gap-6 text-xs text-[#555] mt-1">
+        <span><span className="text-[#4ade80] font-medium">{serveRate}%</span> shown</span>
+        <span><span className="text-[#f87171] font-medium">{suppressRate}%</span> blocked</span>
+        <span>{total.toLocaleString()} total</span>
+      </div>
     </div>
   );
 }

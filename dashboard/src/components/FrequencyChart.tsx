@@ -23,5 +23,12 @@ export function FrequencyChart({ data }: { data: Bucket[] }) {
 }
 
 function Empty({ label }: { label: string }) {
-  return <div className="flex items-center justify-center h-48 text-gray-600 text-sm">{label}</div>;
+  return (
+    <div className="flex flex-col items-center justify-center h-48 gap-2">
+      <div className="text-[#333] text-sm">{label}</div>
+      <div className="text-[10px] text-[#2a2a2a] text-center max-w-48 leading-relaxed">
+        Bars will appear here as the browser extension detects ads and sends noisy reports to the cap service.
+      </div>
+    </div>
+  );
 }
