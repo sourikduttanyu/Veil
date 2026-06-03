@@ -22,3 +22,16 @@ func GetEnforcementSummary(pg *store.PGStore) http.HandlerFunc {
 		json.NewEncoder(w).Encode(summary)
 	}
 }
+
+func GetEnforcementTotal(pg *store.PGStore) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		summary, err := pg.GetEnforcementTotal(r.Context())
+		if err != nil {
+			http.Error(w, `{"error":"internal"}`, http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(summary)
+	}
+}

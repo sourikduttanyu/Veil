@@ -21,11 +21,9 @@ export async function fetchBudgets(cohortId: string): Promise<BudgetRow[]> {
   return r.json();
 }
 
-export async function fetchEnforcementSummary(campaignId: string): Promise<EnforcementSummary> {
-  // Derive from enforcement log via distribution endpoint counts
-  // Cap-service doesn't have a summary endpoint yet — compute from logs
+export async function fetchEnforcementSummary(_campaignId: string): Promise<EnforcementSummary> {
   try {
-    const r = await fetch(`${CAP_URL}/enforcement-summary/${campaignId}`);
+    const r = await fetch(`${CAP_URL}/enforcement-summary`);
     if (r.ok) return r.json();
   } catch {}
   return { served: 0, suppressed: 0 };

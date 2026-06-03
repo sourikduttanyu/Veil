@@ -114,6 +114,32 @@ func (s *PGStore) GetEnforcementSummary(ctx context.Context, campaignID string) 
 	return summary, rows.Err()
 }
 
+// GetEnforcementTotal returns serve/suppress counts across all campaigns.
+func (s *PGStore) GetEnforcementTotal(ctx context.Context) (EnforcementSummary, error) {
+	rows, err := s.db.Query(ctx,
+		`SELECT action, COUNT(*) FROM cap_enforcement_log GROUP BY action`,
+	)
+	if err != nil {
+		return EnforcementSummary{}, err
+	}
+	defer rows.Close()
+
+	var summary EnforcementSummary
+	for rows.Next() {
+		var action string
+		var count int
+		if err := rows.Scan(&action, &count); err != nil {
+			return EnforcementSummary{}, err
+		}
+		if action == "serve" {
+			summary.Served = count
+		} else {
+			summary.Suppressed = count
+		}
+	}
+	return summary, rows.Err()
+}
+
 // GetDistribution aggregates impression_log by noisy_value for a campaign.
 func (s *PGStore) GetDistribution(ctx context.Context, campaignID string) ([]Bucket, error) {
 	rows, err := s.db.Query(ctx,
