@@ -4,11 +4,11 @@
 
 ---
 
-I built Veil because I was annoyed by a specific thing, not advertising in general.
+I built Veil because I care deeply about privacy, and because what is happening to it right now feels genuinely dystopian.
 
-I do not have a principled objection to ads. They fund most of the internet I use. What bothers me is the experience of being followed. Seeing the same ad twenty times. Knowing that somewhere, a system has built a detailed enough model of my behavior to know that I am still "in market" for the thing I searched for once, three weeks ago.
+I do not have a principled objection to ads. They fund most of the internet I use. What bothers me is the experience of being followed. Seeing the same ad twenty times. Searching for something once and having it trail you across every website for weeks. And then there are the moments that cross into something stranger: you think about a product, mention it out loud, and an ad for it appears within the hour. Maybe it is coincidence. Maybe it is contextual signals you are not aware of. Either way, the feeling it produces is the feeling of being watched, and that feeling is the product of a surveillance infrastructure that most people have no idea exists.
 
-Frequency capping is supposed to prevent that. Show each person an ad at most N times. Simple rule. The problem is that enforcing it has always required the system to know who you are. You cannot count how many times "this user" has seen an ad without tracking "this user."
+Frequency capping is supposed to prevent at least the repetition problem. Show each person an ad at most N times. Simple rule. The problem is that enforcing it has always required the system to know who you are. You cannot count how many times "this user" has seen an ad without tracking "this user."
 
 That felt like a false constraint to me. So I built something to test whether it was.
 
@@ -56,7 +56,7 @@ Veil is an attempt to build that bridge. It is a Chrome extension with a Go back
 
 **What is next**
 
-The extension works. The code is open at https://github.com/sourikduttanyu/Veil. What I want to build next is publisher-side tooling: a way for a website to declare its frequency cap preferences in a standard format that Veil can read, so the extension does not have to guess what the right limit is for a given campaign.
+The extension is heading to the Chrome Web Store soon. The code is already open at https://github.com/sourikduttanyu/Veil. What I want to build next is publisher-side tooling: a way for a website to declare its frequency cap preferences in a standard format that Veil can read, so the extension does not have to guess what the right limit is for a given campaign.
 
 The longer-term question is whether this model can get real adoption. Publishers would need to trust that LDP-reported counts are accurate enough to be useful. Advertisers would need to accept slightly noisier delivery data in exchange for a system users do not try to circumvent. Both of those require the industry to internalize something it has resisted: that surveillance was never a feature, it was a cost imposed on users that users are now, finally, in a position to refuse.
 

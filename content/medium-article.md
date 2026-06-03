@@ -122,7 +122,7 @@ Publishers benefit from this too. A frequency-capped ad system that users can tr
 
 ## How to Try It and How to Contribute
 
-The extension is open source: https://github.com/sourikduttanyu/Veil
+The extension is heading to the Chrome Web Store soon. The code is already open source: https://github.com/sourikduttanyu/Veil
 
 To run it locally: clone the repository, load the `extension/` directory as an unpacked Chrome extension, and start the Go services with `docker-compose up`. The Python simulation scripts in `/client` let you model the epsilon-accuracy tradeoff for different campaign scenarios before deploying.
 
